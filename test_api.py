@@ -4,11 +4,39 @@ from urllib2 import Request, urlopen
 
 print("~~~~~~~~~~   test Face Analysis   ~~~~~~~~~~")
 
-request = Request('http://127.0.0.1:5000/v1/faceAnalysis?imageId=000001&analysisType=source')
+values = """
+{
+    "image_url": "static/img/ok.txt",
+    "analysisType": "seasoning"
+}"""
+
+headers = {
+  'Content-Type': 'application/json'
+}
+request = Request('http://127.0.0.1:5000/v1/faceAnalysis', data=values, headers=headers)
 
 response_body = urlopen(request).read()
 print response_body
 
+print("~~~~~~~~~~   test Face Analysis Error ~~~~~~")
+
+values = """
+{
+    "image_url": "static/img/ng.txt",
+    "analysisType": "seasoning"
+}"""
+
+headers = {
+  'Content-Type': 'application/json'
+}
+request = Request('http://127.0.0.1:5000/v1/faceAnalysis', data=values, headers=headers)
+
+try:
+    response_body = urlopen(request).read()
+    print response_body
+except:
+    print "error"
+    
 print("~~~~~~~~~~   test Cange Face   ~~~~~~~~~~")
 
 values = """

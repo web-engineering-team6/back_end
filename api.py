@@ -6,24 +6,23 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
     
-@app.route("/v1/faceAnalysis", methods=['GET'])
+@app.route("/v1/faceAnalysis", methods=['POST'])
 def faceAnalysis():
-    # request.argsにクエリパラメータが含まれている
-    imageId = request.args.get("imageId", "000001")
-    analysisType = request.args.get("analysisType", "source")
+    if request.headers['Content-Type'] != 'application/json':
+        print(request.headers['Content-Type'])
+        return flask.jsonify(res='error'), 400
     
-    f = open("static/text.txt", "r")
+    # request.argsにクエリパラメータが含まれている
+    image_url = json.loads(request.data)["image_url"]
+    analysis_type =  json.loads(request.data)["analysisType"]
+        
+    f = open(image_url, "r")
     txt = f.read()
     f.close()
     
-    text_json = """
-{
-    "text": [
-        txt
-    ]
-}
-"""
-    return text_json
+    num = int(txt[10:13])
+    
+    return  txt[:9] 
     
 @app.route('/v1/changeFace', methods=['POST'])
 def changeFace():
