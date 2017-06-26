@@ -1,4 +1,4 @@
-from urllib2 import Request, urlopen
+from urllib2 import Request, urlopen, HTTPError
 
 #request = Request('https://private-daeedf-aichangesfaces.apiary-mock.com/face_analysis/imageAnalysis?imageId=000001&analysisType=source')
 
@@ -34,9 +34,10 @@ request = Request('http://127.0.0.1:5000/v1/faceAnalysis', data=values, headers=
 try:
     response_body = urlopen(request).read()
     print response_body
-except:
-    print "error"
-    
+except HTTPError, e:
+    print(e.code)
+    print(e.reason)
+        
 print("~~~~~~~~~~   test Cange Face   ~~~~~~~~~~")
 
 values = """
