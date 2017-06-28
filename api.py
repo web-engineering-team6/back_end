@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import api_functions
 
 from flask import Flask, request, jsonify
 
@@ -15,14 +16,10 @@ def faceAnalysis():
     # request.argsにクエリパラメータが含まれている
     image_url = json.loads(request.data)["image_url"]
     analysis_type =  json.loads(request.data)["analysisType"]
-        
-    f = open(image_url, "r")
-    txt = f.read()
-    f.close()
     
-    num = int(txt[10:13])
+    analysis_result = face_analysis_main(image_url, analusis_type)
     
-    return  txt[:9] 
+    return  analysis_result
     
 @app.route('/v1/changeFace', methods=['POST'])
 def changeFace():
