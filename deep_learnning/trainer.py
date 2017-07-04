@@ -35,7 +35,7 @@ class Trainer:
 			batch_mask = np.random.choice(len(x_test), 1000)
 			x_batch = x_test[batch_mask]
 			t_batch = t_test[batch_mask]
-			test_acc = network.accuracy(x_batch, t_batch)
+			test_acc = self.network.accuracy(x_batch, t_batch)
 			test_acc_list.append(test_acc)
 			print('iter%i loss : %f' %(i, loss))
 			print('iter%i accuracy : %f' %(i, test_acc))  
