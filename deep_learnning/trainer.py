@@ -1,6 +1,7 @@
 import numpy as np
 from conv_net import ConvNet
 from optimization import *
+import sys
 
 class Trainer:
 	def __init__(self, network):
@@ -22,18 +23,19 @@ class Trainer:
 			for batch_mask in mask_list:
 				x_batch = x_train[batch_mask]
 				t_batch = t_train[batch_mask]
-			    			
+						
 				grads = self.network.gradient(x_batch, t_batch)
 				paras = self.network.paras
 				optimizer.update(paras, grads)
 				loss = self.network.loss(x_batch, t_batch)
-				print(loss)
+				sys.stdout.write("\r%f" % loss)
+				sys.stdout.flush()
 				train_loss_list.append(loss)
-    		
+		
 			batch_mask = np.random.choice(len(x_test), 1000)
 			x_batch = x_test[batch_mask]
 			t_batch = t_test[batch_mask]
-			test_acc = network.accuracy(x_batch, t_batch)
+			test_acc = self.network.accuracy(x_batch, t_batch)
 			test_acc_list.append(test_acc)
 			print('iter%i loss : %f' %(i, loss))
 			print('iter%i accuracy : %f' %(i, test_acc))  

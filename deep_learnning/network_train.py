@@ -5,6 +5,8 @@ import time
 import numpy as np
 from mnist_load import load_mnist
 from conv_net import ConvNet
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 from PIL import Image
 from optimization import *
@@ -32,4 +34,16 @@ optimizer = Adam()
 input_data = {"x_train": x_train, "t_train": t_train, "x_test": x_test, "t_test": t_test}
 
 trainer = Trainer(network)
-trainer.train(optimizer, input_data, 10, batch_size = 100)
+train_loss_list, test_acc_list = trainer.train(optimizer, input_data, 3, batch_size = 100)
+
+elapsed_time = time.time() - start
+print("elapsed_time : %f [sec]" % elapsed_time)
+plt.plot(train_loss_list)
+plt.savefig("result/loss_list_multi_trainer")
+
+plt.figure()
+plt.plot(test_acc_list)
+plt.savefig("result/test_acc_list_multi_trainer")
+
+with open('network/mnist_network_trainer.pkl', mode='wb') as f:
+    pickle.dump(network, f)
