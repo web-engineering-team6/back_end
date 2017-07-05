@@ -1,6 +1,7 @@
 #coding:utf-8
 
 import numpy as np
+from scipy import ndimage
 
 rng = np.random.RandomState(1234)
 
@@ -22,6 +23,11 @@ def cropping(x):
 	cropped_train_X = [padded[i, c[0]:(c[0]+32), c[1]:(c[1]+32), :] for i, c in enumerate(crops)]
 	cropped_train_X = np.array(cropped_train_X)
 	return cropped_train_X
+	
+def rolling(x):
+	r = rng.randint(-40, 41)
+	rol_x = ndimage.rotate(x, r, reshape=False)
+	return rol_x
 	
 
 def gcn(x):
