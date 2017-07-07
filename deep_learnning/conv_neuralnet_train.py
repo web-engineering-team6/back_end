@@ -5,6 +5,8 @@ import time
 import numpy as np
 from mnist_load import load_mnist
 from conv_net import ConvNet
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 from PIL import Image
 from optimization import *
@@ -47,7 +49,8 @@ for i in range(iters_num):
     paras = network.paras
     optimizer.update(paras, grads)
     loss = network.loss(x_batch, t_batch)
-    print(loss)
+    sys.stdout.write("\r%f" % loss)
+    sys.stdout.flush()
     train_loss_list.append(loss)
 
     if i % iter_per_epoch == 0:
@@ -56,18 +59,19 @@ for i in range(iters_num):
         t_batch = t_test[batch_mask]
         test_acc = network.accuracy(x_batch, t_batch)
         test_acc_list.append(test_acc)
+        print()
         print('iter%i loss : %f' %(i, loss))
         print('iter%i accuracy : %f' %(i, test_acc))     
 
 elapsed_time = time.time() - start
-print("elapsed_time : %f [sec]" % elapsed_time)
+print("elapsed_time : %i [min]" % (elapsed_time//60))
 plt.plot(train_loss_list)
-plt.savefig("loss_list_multi")
+plt.savefig("result/loss_list_multi")
 
 plt.figure()
 plt.plot(test_acc_list)
-plt.savefig("test_acc_list_multi")
+plt.savefig("result/test_acc_list_multi")
 
-with open('mnist_network.pkl', mode='wb') as f:
+with open('network/mnist_network.pkl', mode='wb') as f:
     pickle.dump(network, f)
 
