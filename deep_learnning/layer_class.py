@@ -319,7 +319,10 @@ class Convolution:
         self.db = dout.sum(axis=(0, 2, 3))
 
         dcol = np.tensordot(dout, self.W, (1, 0)).astype(dout.dtype, copy=False).transpose(0, 3, 4, 5, 1, 2)
-        input_shape = (len_dout, *self.x.shape[1:])
+        #input_shape = (len_dout, *self.x.shape[1:])
+        #python2だとこの記法はうまくいきません
+        #関数の引数で使うときは問題ないのですが。
+        input_shape = (len_dout, self.x.shape[1], self.x.shape[2], self.x.shape[3])
         dx = col2im(dcol, input_shape, FH, FW, self.stride, self.pad)
 
         return dx
