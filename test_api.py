@@ -6,7 +6,7 @@ print("~~~~~~~~~~   test Face Analysis   ~~~~~~~~~~")
 
 values = """
 {
-    "image_url": "static/img/ok.txt",
+    "image_url": "https://cdn-ak.f.st-hatena.com/images/fotolife/s/summer-jingu-stadium/20161204/20161204141519.png",
     "analysisType": "seasoning"
 }"""
 

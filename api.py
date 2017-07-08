@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-import api_functions
+import api_functions as af
 
 from flask import Flask, request, jsonify
 
@@ -17,7 +17,7 @@ def faceAnalysis():
     image_url = json.loads(request.data)["image_url"]
     analysis_type =  json.loads(request.data)["analysisType"]
     
-    analysis_result = face_analysis_main(image_url, analusis_type)
+    analysis_result = af.face_analysis_main(image_url, analysis_type)
     
     return  analysis_result
     

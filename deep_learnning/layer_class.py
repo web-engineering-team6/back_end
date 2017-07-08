@@ -235,7 +235,11 @@ class BatchNormalization:
         if x.ndim != 2:
             N, C, H, W = x.shape
             x = x.reshape(N, -1)#(N, C*H*W)に変形
-
+        
+        if x.shape[0] == 1:
+            out = x.copy().reshape(*self.input_shape)
+            return out
+        
         out = self.__forward(x)
 
         return out.reshape(*self.input_shape)#"*"はタプルの展開
@@ -259,6 +263,10 @@ class BatchNormalization:
         if dout.ndim != 2:
             N, C, H, W = dout.shape
             dout = dout.reshape(N, -1)
+            
+        if dout.shape[0] == 1:
+            dx = dout.copy().reshape(len(dout), *self.input_shape[1:])
+            return dx
 
         dx = self.__backward(dout)
 
