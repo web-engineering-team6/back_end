@@ -24,7 +24,7 @@ def cross_entropy_error(y, t):
         t = t.argmax(axis=1)
 
     batch_size = y.shape[0]
-    return -np.sum(np.log(y[np.arange(batch_size), t])) / batch_size
+    return -np.sum(np.log(y[np.arange(batch_size), t] + 1e-8)) / batch_size
 
 
 def im2col(input_data, filter_h, filter_w, stride=1, pad=0):

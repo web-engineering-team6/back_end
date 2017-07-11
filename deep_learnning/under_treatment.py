@@ -9,22 +9,22 @@ rng = np.random.RandomState()#1234)
 def flipping(x):
 	x_return = x.copy()
 	mask = (np.random.randint(0, 2, len(x)) == 1)
-	x_return[mask] = x_return[mask][:, :, ::-1, :]
+	x_return[mask] = x_return[mask][:, :, :, ::-1]
 	return x_return
 	
     
-def cropping(x, scale=4):
+def cropping(x, move_rate=4):
 	img_size = x.shape[3]
-	padded = np.pad(x, ((0, 0), (0, 0), (img_size//(scale*2), img_size//(scale*2)), (img_size//(scale*2), img_size//(scale*2))), mode='constant')
-	crops = rng.randint(img_size//scale, size=(len(x), 2))
+	padded = np.pad(x, ((0, 0), (0, 0), (img_size//(move_rate*2), img_size//(move_rate*2)), (img_size//(move_rate*2), img_size//(move_rate*2))), mode='constant')
+	crops = rng.randint(img_size//move_rate, size=(len(x), 2))
 	cropped_train_X = [padded[i, :, c[0]:(c[0]+img_size), c[1]:(c[1]+img_size)] for i, c in enumerate(crops)]
 	cropped_train_X = np.array(cropped_train_X)
 	return cropped_train_X
 	
     
 def rolling(x, degree=15):
-	r = rng.randint(-degree, degree+1)
-	rol_x = ndimage.rotate(x.copy(), r, reshape=False)
+	r = 15#rng.randint(-degree, degree+1)
+	rol_x = ndimage.rotate(x.copy().transpose(2,3,1,0), r, reshape=False).transpose(3,2,0,1)
 	return rol_x
 	
     
