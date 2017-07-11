@@ -1,1 +1,0 @@
-faceAnalysisは正常に稼動しています。

@@ -218,10 +218,12 @@ class SoftmaxWithLoss:
 
 
 class BatchNormalization:
-    def __init__(self, gamma, beta):
+    def __init__(self, gamma, beta, init_mu=0, init_std=1):
         self.gamma = gamma
         self.beta = beta
         self.input_shape = None  # Conv層の場合は4次元、全結合層の場合は2次元
+        self.init_mu = init_mu
+        self.init_std = init_std
 
         # backward時に使用する中間データ
         self.batch_size = None
@@ -235,7 +237,13 @@ class BatchNormalization:
         if x.ndim != 2:
             N, C, H, W = x.shape
             x = x.reshape(N, -1)#(N, C*H*W)に変形
-
+        
+        if x.shape[0] == 1:
+            xn = (x.copy() - self.init_mu) / self.init_std
+            out = self.gamma * xn + self.beta
+            out = out.reshape(*self.input_shape)
+            return out
+        
         out = self.__forward(x)
 
         return out.reshape(*self.input_shape)#"*"はタプルの展開
@@ -251,6 +259,8 @@ class BatchNormalization:
         self.xc = xc
         self.xn = xn
         self.std = std
+        self.init_mu = mu
+        self.init_std = std
 
         out = self.gamma * xn + self.beta
         return out
@@ -259,6 +269,10 @@ class BatchNormalization:
         if dout.ndim != 2:
             N, C, H, W = dout.shape
             dout = dout.reshape(N, -1)
+            
+        if dout.shape[0] == 1:
+            dx = dout.copy().reshape(len(dout), *self.input_shape[1:])
+            return dx
 
         dx = self.__backward(dout)
 
@@ -319,7 +333,10 @@ class Convolution:
         self.db = dout.sum(axis=(0, 2, 3))
 
         dcol = np.tensordot(dout, self.W, (1, 0)).astype(dout.dtype, copy=False).transpose(0, 3, 4, 5, 1, 2)
-        input_shape = (len_dout, *self.x.shape[1:])
+        #input_shape = (len_dout, *self.x.shape[1:])
+        #python2だとこの記法はうまくいきません
+        #関数の引数で使うときは問題ないのですが。
+        input_shape = (len_dout, self.x.shape[1], self.x.shape[2], self.x.shape[3])
         dx = col2im(dcol, input_shape, FH, FW, self.stride, self.pad)
 
         return dx

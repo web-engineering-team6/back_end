@@ -147,7 +147,8 @@ class ConvNet:
                 layers_txt += "\tpad=%i" % self.layers["Pooling" + layer_split[1]].pad
                 
             if layer_split[0] == "BatchNorm":
-                gamma = self.layers["BatchNorm" + layer_split[1]].gamma
+                layers_txt += "\tinit_mu=%f" % self.layers["BatchNorm" + layer_split[1]].init_mu
+                layers_txt += "\tinit_std=%f" % self.layers["BatchNorm" + layer_split[1]].init_std                gamma = self.layers["BatchNorm" + layer_split[1]].gamma
                 beta = self.layers["BatchNorm" + layer_split[1]].beta
                 np.save("%s/%s_gamma.npy" % (dir_name, layer), gamma)
                 np.save("%s/%s_beta.npy" % (dir_name, layer), beta)
@@ -162,7 +163,7 @@ class ConvNet:
 
             
 def load_network(dir_name):
-    netwark = ConvNet()
+    network = ConvNet()
     with open(dir_name + "/layers.txt") as f:
         layer_list = f.read().split("\n")[:-1]
     for layer in layer_list:
@@ -175,16 +176,16 @@ def load_network(dir_name):
             network.paras["W" + layer_num] = W
             network.paras["b" + layer_num] = b
             network.layers["layer" + layer_num] =\
-                Affine(W, b, eval(layer_split[1]))
+                Affine(W, b, output_shape = eval(layer_split[1].split("=")[1]))
                 
         if layer_split[0].split("_")[0] == "Conv":
             layer_num = layer_split[0].split("_")[1]
             W = np.load("%s/%s_W.npy" % (dir_name, layer_split[0]))
             b = np.load("%s/%s_b.npy" % (dir_name, layer_split[0]))
             network.paras["W" + layer_num] = W
-            network.paras["b" + layer_num] = b     
+            network.paras["b" + layer_num] = b
             network.layers["layer" + layer_num] =\
-                Convolution(W, b, eval(layer_split[1]), eval(layer_split[2]))
+                Convolution(W, b, stride = int(layer_split[1].split("=")[1]), pad=int(layer_split[2].split("=")[1]))
                 
         if layer_split[0].split("_")[0] == "Deconv":
             layer_num = layer_split[0].split("_")[1]
@@ -193,11 +194,14 @@ def load_network(dir_name):
             network.paras["W" + layer_num] = W
             network.paras["b" + layer_num] = b     
             network.layers["layer" + layer_num] =\
-                Deconvolution(W, b, eval(layer_split[1]), eval(layer_split[2]))
+                Deconvolution(W, b, stride = int(layer_split[1].split("=")[1]), pad=int(layer_split[2].split("=")[1]))
+
                 
         if layer_split[0].split("_")[0] == "Pooling":
             layer_num = layer_split[0].split("_")[1]
-            network.layers["Pooling" + layer_num] = Pooling(eval(layer_split[1]), eval(layer_split[2]), eval(layer_split[3]), eval(layer_split[4]))
+            network.layers["Pooling" + layer_num] =\
+                Pooling(pool_h = int(layer_split[1].split("=")[1]), pool_w = int(layer_split[2].split("=")[1]),\
+                stride = int(layer_split[3].split("=")[1]), pad = int(layer_split[4].split("=")[1]))
             
         if layer_split[0].split("_")[0] == "BatchNorm":
             batch_norm_num = layer_split[0].split("_")[1]
@@ -206,7 +210,8 @@ def load_network(dir_name):
             network.paras["gamma" + batch_norm_num] = gamma
             network.paras["beta" + layer_num] = beta
             network.layers["BatchNorm" + batch_norm_num] =\
-                BatchNormalization(gamma, beta)
+                BatchNormalization(gamma, beta,\
+                 init_mu = float(layer_split[1].split("=")[1]), init_std = float(layer_split[2].split("=")[1]))
                 
         if layer_split[0].split("_")[0] == "Relu":
             layer_num = layer_split[0].split("_")[1]
@@ -214,7 +219,7 @@ def load_network(dir_name):
             
         if layer_split[0].split("_")[0] == "Elu":
             layer_num = layer_split[0].split("_")[1]
-            network.layers["Elu" + layer_num] = Elu(eval(layer_split[1]))
+            network.layers["Elu" + layer_num] = Elu(alpha = float(layer_split[1].split("=")[1]))
         
         if layer_split[0].split("_")[0] == "Sigmoid":
             layer_num = layer_split[0].split("_")[1]

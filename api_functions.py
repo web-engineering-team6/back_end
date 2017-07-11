@@ -1,23 +1,28 @@
 #coding: utf-8
 
-import numpy
+import numpy as np
 import requests
 import os
 import sys
 import cv2
+from deep_learnning.conv_net import *
+from deep_learnning.under_treatment import *
+import json
 
 # 画像をダウンロードする
 def pull_image(url, timeout = 10):
 	#urlを引数にして画像を返します。
 	response = requests.get(url, allow_redirects=False, timeout=timeout)
-	if response.status_code != 200:#もしwebサーバのレスポンスが成功でなかったら
-		e = Exception("HTTP status: " + response.status_code)
+	if response.status_code != 200:
+		e = Exception("HTTP status: " + str(response.status_code))
 		raise e
-	content_type = response.headers["content-type"]#'text/html'や'image'
-	if 'image' not in content_type:#もしcontent_typeに'image'なければ
+	content_type = response.headers["content-type"]
+	if 'image' not in content_type:
 		e = Exception("Content-Type: " + content_type)
 		raise # coding=utf-8
-	return response.content
+	buf = np.fromstring(response.content, dtype=np.uint8)
+	face = cv2.imdecode(buf, cv2.IMREAD_COLOR)
+	return face
 
 # 画像のファイル名を決める
 def make_filename(base_dir, number, url):
@@ -31,49 +36,73 @@ def save_image(filename, image):
     with open(filename, "wb") as fout:
         fout.write(image)
 
-def check_faces():
-	#画像とfaceTypeを引き数に顔の組成を調べます。
-	#切り出した画像が顔かどうか調べる。
-	#顔のカスケード分類器のファイルを同じディレクトリに入れてパス指定
-	cascade_path = "haarcascade_frontalface_alt.xml"
-	#カスケード分類器の特徴量を取得する
-	cascade = cv2.CascadeClassifier(cascade_path)
-	img = cv2.imread(filename)
-	# 顔を検知
-	faces = cascade.detectMultiScale(img, minSize=(48,48))#顔miniサイズ仮に48,48とした
-	#このコードでは、一つの写真には一人だけ写っている前提
-	if faces == cascade.detectMultiScale(img, minSize=(48,48)):
-		for (x,y,w,h) in faces:
-	    	# 検知した顔を矩い青の四角形で囲む
-	    	cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)#96*96にする方法分からず。
-	    	#顔の部分だけのカット写真を作る。
-	    	cut_img = img[y:y+h,x:x+w]
-			# 画像表示と保存
-			cv2.imshow('img',img)
-			cv2.imwrite("face_of_" + filename,cut_img)
-		#回転不変性もあると嬉しいです。→郷治このやり方分かりません(7月3日(月))。
-		#check_facesでしっかりとした顔画像があるかどうか調べて違ったら最低サイズを更新していく感じで作っていきたいです。
-		# →郷治このやり方分かりません(7月3日(月))。
-	else:
-		return None# return Noneは、返した値が後々使われるときに使われます。
 
-#郷治にて上のcheck_faces()に顔検出・出力まで記載したのですが、cut_facesの関数が別に必要である理由がよくわかりません。
-def cut_faces():
-	#画像の型に関しては迷っています。おそらくndarrayです。→郷治よく理解できません。
+def check_faces(cut_face):
+	return True
+	
+	
+def cut_faces(face):
+	#画像の型に関しては迷っています。おそらくndarrayです。
 	#顔を切り出す。
 	#画像を引き数に顔を検出
 	#96x96の画像を出力 →郷治:出力画像の大きさを96*96にする方法分かりませんでした。
-	return None
+	cascade_path = "haarcascade_frontalface_alt.xml"
+	cascade = cv2.CascadeClassifier(cascade_path)
+	center = tuple(np.array(face.shape[0:2])/2)
+	rIntr = 5
+	rs = -30
+	re = 30
+	for r in range(rs, re+1, rIntr):
+		rotMat = cv2.getRotationMatrix2D(center, r, 1.0)    
+		roll_face = cv2.warpAffine(face, rotMat, face.shape[0:2], flags=cv2.INTER_LINEAR)
+		faces = cascade.detectMultiScale(roll_face, minSize=(45,45))
+		#cv2.imshow('img',roll_face)
+		#cv2.waitKey(0)
+		#cv2.destroyAllWindows()
+		for (x,y,w,h) in faces:
+			cut_face = roll_face[y:y+h,x:x+w]
+			cut_face = cv2.resize(cut_face,(96,96))
+			if check_faces(cut_face):
+				return cut_face
+	
 
-#郷治には顔の分析の仕方とそのコード分かりません。
-def analysis_face()
-	#顔を分析する。
-	#返り値はjsonで
-	return None
+def softmax(x):
+    x = x - np.max(x) # オーバーフロー対策
+    return np.exp(x) / np.sum(np.exp(x))
 
-#以下は郷治にてanalysis_typeのスペルミスのみ直しました。
+
+def analysis_face(face_image, analysis_type="seasoning"):
+	face_other = np.load("x_train_batch.npy")[:9]
+	face_image = face_image.transpose(2, 0, 1)
+	face_image = face_image[np.newaxis, :, :, :]
+	face_image = np.vstack((face_image, face_other))
+	network = load_network("network")
+	face_data = network.predict(face_image)[0]
+	if np.argmax(face_data) % 2 == 0:
+		face_data = face_data[np.array([True,False,True,False,True,False])]
+	else:
+		face_data = face_data[np.array([False,True,False,True,False,True])]
+	face_data=softmax(face_data)
+	json_data = [
+            {
+                "attribute_name1": "solty",
+                "attribute1": face_data[0]
+            },
+            {
+                "attribute_name2": "soysource",
+                "attribute2":  face_data[1]
+            },
+            {
+                "attribute_name3": "source",
+                "attribute3":  face_data[2]
+            }
+        ]
+ 	jsonstring = json.dumps(json_data, ensure_ascii=False)
+	return jsonstring
+
+
 def face_analysis_main(image_url, analysis_type):
-	face_image = pull_image(url)
+	face_image = pull_image(image_url)
 	cut_image = cut_faces(face_image)
-	face_component = analysis_faces(cut_image, analysis_type)
+	face_component = analysis_face(cut_image, analysis_type)
 	return face_component
