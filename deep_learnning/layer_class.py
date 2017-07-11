@@ -218,10 +218,12 @@ class SoftmaxWithLoss:
 
 
 class BatchNormalization:
-    def __init__(self, gamma, beta):
+    def __init__(self, gamma, beta, init_mu=0, init_std=1):
         self.gamma = gamma
         self.beta = beta
         self.input_shape = None  # Conv層の場合は4次元、全結合層の場合は2次元
+        self.init_mu = init_mu
+        self.init_std = init_std
 
         # backward時に使用する中間データ
         self.batch_size = None
@@ -237,7 +239,9 @@ class BatchNormalization:
             x = x.reshape(N, -1)#(N, C*H*W)に変形
         
         if x.shape[0] == 1:
-            out = x.copy().reshape(*self.input_shape)
+            xn = (x.copy() - self.init_mu) / self.init_std
+            out = self.gamma * xn + self.beta
+            out = out.reshape(*self.input_shape)
             return out
         
         out = self.__forward(x)
@@ -255,6 +259,8 @@ class BatchNormalization:
         self.xc = xc
         self.xn = xn
         self.std = std
+        self.init_mu = mu
+        self.init_std = std
 
         out = self.gamma * xn + self.beta
         return out
