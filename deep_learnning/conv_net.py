@@ -167,10 +167,14 @@ class ConvNet:
             
 def load_network(dir_name):
     network = ConvNet()
+    network.layer_list = []
+    
     with open(dir_name + "/layers.txt") as f:
         layer_list = f.read().split("\n")[:-1]
+        
     for layer in layer_list:
         layer_split = layer.split("\t")
+        network.layer_list.append(layer_split[0])
         
         if layer_split[0].split("_")[0] == "Affine":
             layer_num = layer_split[0].split("_")[1]
