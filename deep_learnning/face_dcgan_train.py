@@ -1,7 +1,6 @@
 #coding:utf-8
 
 import sys, os
-import time
 import numpy as np
 from conv_net import ConvNet
 from optimization import *
@@ -15,10 +14,10 @@ class Generator(ConvNet):
         super(Generator, self).__init__()
         ConvNet.add_affine(self, nz, 512)
         ConvNet.add_batch_normalization(self, 512, "Relu")
-        ConvNet.add_affine(self, 512, 64*12*12, output_shape=(16, 12, 12))
+        ConvNet.add_affine(self, 512, 64*12*12, output_shape=(64, 12, 12))
         ConvNet.add_batch_normalization(self, 64*12*12, "Relu")
         ConvNet.add_deconv(self, 64, 32, 4, 4, stride=2 ,pad=1, wscale=0.3)
-        ConvNet.add_batch_normalization(self, 32*24*32, "Relu")
+        ConvNet.add_batch_normalization(self, 32*24*24, "Relu")
         ConvNet.add_deconv(self, 32, 16, 4, 4, stride=2, pad=1, wscale=0.3)
         ConvNet.add_batch_normalization(self, 16*48*48, "Relu")
         ConvNet.add_deconv(self, 16, 3, 4, 4, stride=2, pad=1, wscale=0.3)
@@ -77,7 +76,7 @@ class Discriminator(ConvNet):
         return loss, dout,grad
 
 def load_faces():
-	if os.path.exists("./faces/x_train.npy"):
+    if os.path.exists("./faces/x_train.npy"):
         x_train = np.load("faces/x_train.npy")
         return x_train
     else:
@@ -130,10 +129,10 @@ input_img = boost_input(input_img)
 
 #学習
 dc_trainer = DCGAN_trainer(gen, dis)
-dc_trainer.train(opt_gen, opt_dis, input_img, epoch_num, nz=nz, batch_size=batch_size, save="dcgac_faces", img_test="img_test", graph="graph"):
+train_time = dc_trainer.train(opt_gen, opt_dis, input_img, epoch_num, nz=nz, batch_size=batch_size, save="dcgan_faces", img_test="img_test", graph="graph")
 
 
-minute = (time.time() - start) // 60
+minute = train_time // 60
 hour = minute // 60
 minute = minute % 60
 memo += '\n\n%d時間%d分かかりました' % (hour, minute)

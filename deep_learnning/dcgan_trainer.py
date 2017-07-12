@@ -8,6 +8,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 from sklearn.utils import shuffle
+import time
 
 class DCGAN_trainer:
 	def __init__(self, gen, dis):
@@ -18,27 +19,44 @@ class DCGAN_trainer:
 		
 		if save is not None:
 			save_dir = save
-			os.mkdir(save_dir)
+			try:
+				os.mkdir(save_dir)
+			except:
+				pass
 			
 		if img_test is not None:
 			if save is None:
 				img_test_dir = img_test
 			else:
 				img_test_dir = "%s/%s" % (save ,img_test)
-			so.mkdir(img_test_dir)
-
+			try:
+				os.mkdir(img_test_dir)
+			except:
+				pass
+            
 		if graph is not None:
 			if save is None:
 				graph_dir = graph
 			else:
 				graph_dir = "%s/%s" % (save ,graph)
-			os.mkdir(graph_dir)
+			try:
+				os.mkdir(graph_dir)
+			except:
+				pass
 				
 		z_test = np.random.uniform(-1, 1, (batch_size, nz)).astype(np.float32)
 		losslist_gen = []
 		losslist_dis = []
 		
 		start = time.time()
+		if img_test is not None:  # 1epochごとに絵を出力,100枚ぐらい
+			x = self.gen.predict(z_test).transpose(0, 2, 3, 1)
+			fig = plt.figure(figsize=(10, 10))
+			for (j, img) in enumerate(x):
+				ax = fig.add_subplot(10, 10, j + 1, xticks=[], yticks=[])
+				ax.imshow(img)
+			plt.savefig('%s/gen_start.png' % img_test_dir)        
+
 		for epoch in range(epoch_num):
 			input_img_epoch = shuffle(input_img).reshape(int(len(input_img)/batch_size), batch_size, *input_img.shape[1:])
 
@@ -54,7 +72,7 @@ class DCGAN_trainer:
 				loss_gen, dout_x, _ = self.dis.back_going(y, t)
 				grads_gen = self.gen.gradient_gen(dout_x)
 				paras_gen = self.gen.paras
- 				opt_gen.update(paras_gen, grads_gen)
+				opt_gen.update(paras_gen, grads_gen)
 				#disの学習
 				t = np.zeros(batch_size, dtype=np.int8)
 				loss_dis, _, grads_dis = self.dis.back_going(y, t)
@@ -73,7 +91,7 @@ class DCGAN_trainer:
 				if i % 100 == 99:
 					print((time.time() - start) // 60)
 					if img_test is not None:  # 1epochごとに絵を出力,100枚ぐらい
-						x = gen.predict(z_test)
+						x = self.gen.predict(z_test).transpose(0, 2, 3, 1)
 						fig = plt.figure(figsize=(10, 10))
 						for (j, img) in enumerate(x):
 							ax = fig.add_subplot(10, 10, j + 1, xticks=[], yticks=[])
@@ -88,8 +106,8 @@ class DCGAN_trainer:
 						plt.savefig("%s/loss_graph" % (graph_dir))
 			
 			if save is not None:
-				self.gen.save_network(save_dir + "/Generator_%i" % (epoch+1))	
-				self.dis..save_network(save_dir + "/Discriminator_%i" % (epoch+1))	
+				self.gen.save_network(save_dir + "/Generator_%i" % (epoch+1))
+				self.dis.save_network(save_dir + "/Discriminator_%i" % (epoch+1))
 			
 		return time.time() - start
 		

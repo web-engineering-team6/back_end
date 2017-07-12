@@ -141,6 +141,22 @@ class Elu:
         dx[mask] = dout[mask] * self.alpha * np.exp(self.x[:len_dout][mask])
 
         return dx
+    
+
+class Tanh:
+    def __init__(self):
+        self.out = None
+
+    def forward(self, x):
+        out = np.tanh(x)
+        self.out = out
+
+        return out / 2 + 1
+
+    def backward(self, dout):
+        dx = dout * (1 - np.power(self.out,2)) / 2
+
+        return dx
 
 
 class Sigmoid:

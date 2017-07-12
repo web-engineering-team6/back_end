@@ -54,8 +54,8 @@ class ConvNet:
         
         return grad
 
-    def add_conv(self, input_chanel, output_chanel, filter_width, filter_depth, stride=1, pad=0):
-        self.paras["W" + str(self.layer_num)] = np.sqrt(2 / input_chanel * filter_width * filter_depth)\
+    def add_conv(self, input_chanel, output_chanel, filter_width, filter_depth, stride=1, pad=0, wscale=1):
+        self.paras["W" + str(self.layer_num)] =wscale * np.sqrt(2 / input_chanel * filter_width * filter_depth)\
                                                 * np.random.randn(output_chanel, input_chanel, filter_width, filter_depth)
         self.paras["b" + str(self.layer_num)] = np.zeros(output_chanel)
         self.layers["layer" + str(self.layer_num)] =\
@@ -63,8 +63,8 @@ class ConvNet:
         self.layer_list.append("Conv_" + str(self.layer_num))
         self.layer_num += 1
 
-    def add_deconv(self, input_chanel, output_chanel, filter_width, filter_depth, stride=1, pad=0):
-        self.paras["W" + str(self.layer_num)] = np.sqrt(2 / input_chanel * filter_width * filter_depth)\
+    def add_deconv(self, input_chanel, output_chanel, filter_width, filter_depth, stride=1, pad=0, wscale=1):
+        self.paras["W" + str(self.layer_num)] =wscale * np.sqrt(2 / input_chanel * filter_width * filter_depth)\
                                                 * np.random.randn(output_chanel, input_chanel, filter_width, filter_depth)
         self.paras["b" + str(self.layer_num)] = np.zeros(output_chanel)
         self.layers["layer" + str(self.layer_num)] =\
@@ -102,6 +102,10 @@ class ConvNet:
     def add_sigmoid(self):
         self.layers["Sigmoid" + str(self.layer_num)] = Sigmoid()
         self.layer_list.append("Sigmoid_" + str(self.layer_num))
+        
+    def add_tanh(self):
+        self.layers["Tanh" + str(self.layer_num)] = Tanh()
+        self.layer_list.append("Tanh_" + str(self.layer_num))
         
     def save_network(self, dir_name):
         try:
