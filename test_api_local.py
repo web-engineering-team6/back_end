@@ -8,40 +8,42 @@ values = """{}"""
 headers = {
   'Content-Type': 'application/json'
 }
-request = Request('https://blooming-caverns-18971.herokuapp.com/v1/test', data=values, headers=headers)
-response_body = urlopen(request).read()
-print response_body
+request = Request('http://127.0.0.1:5000/v1/test', data=values, headers=headers)
+#response_body = urlopen(request).read()
+#print response_body
 
 print("~~~~~~~~~~   test Face Analysis   ~~~~~~~~~~")
 
 values = """
 {
-    "image_url": "http://matoryo.info/blog/wp-content/uploads/2016/10/2016-10-11-165439.jpg",
-    "analysis_type": "seasoning"
+    "image_url": "http://img.hadalove.jp/wp-content/uploads/2016/10/d864633e8b3b05fb233433cc7ab67701-e1476150511960.jpg",
+    "analysisType": "seasoning"
 }"""
 
 headers = {
   'Content-Type': 'application/json'
 }
 #request = Request('http://127.0.0.1:5000/v1/faceAnalysis', data=values, headers=headers)
-request = Request('https://blooming-caverns-18971.herokuapp.com/v1/faceAnalysis', data=values, headers=headers)
+request = Request('http://127.0.0.1:5000/v1/faceAnalysis', data=values, headers=headers)
 #https://blooming-caverns-18971.herokuapp.com/
 
 response_body = urlopen(request).read()
 print response_body
 
+quit()
+
 print("~~~~~~~~~~   test Face Analysis Error ~~~~~~")
 
 values = """
 {
-    "image_url": "https://qiita-image-store.s3.amazonaws.com/0/53147/87053ada-2d90-6aa5-3531-ed3b54ffad49.png",
-    "analysis_type": "seasoning"
+    "image_url": "http://takablog.net/wp-content/uploads/2014/11/okinawa_kuroki.jpg",
+    "analysisType": "seasoning"
 }"""
 
 headers = {
   'Content-Type': 'application/json'
 }
-request = Request('https://blooming-caverns-18971.herokuapp.com/v1/faceAnalysis', data=values, headers=headers)
+request = Request('http://127.0.0.1:5000/v1/faceAnalysis', data=values, headers=headers)
 
 try:
     response_body = urlopen(request).read()

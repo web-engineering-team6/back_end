@@ -72,18 +72,18 @@ def softmax(x):
 
 
 def analysis_face(face_image, analysis_type="seasoning"):
-	face_other = np.load("x_train_batch.npy")[:9]
 	face_image = face_image.transpose(2, 0, 1)
 	face_image = face_image[np.newaxis, :, :, :]
-	face_image = np.vstack((face_image, face_other))
 	network = load_network("network")
 	face_data = network.predict(face_image)[0]
 	if np.argmax(face_data) % 2 == 0:
+		sex = "boy"
 		face_data = face_data[np.array([True,False,True,False,True,False])]
 	else:
+		sex = "girl"
 		face_data = face_data[np.array([False,True,False,True,False,True])]
 	face_data=softmax(face_data)
-	json_data = [
+	json_data = [{"sex":sex},
             {
                 "attribute_name1": "solty",
                 "attribute1": face_data[0]
