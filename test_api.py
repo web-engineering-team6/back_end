@@ -16,7 +16,7 @@ print("~~~~~~~~~~   test Face Analysis   ~~~~~~~~~~")
 
 values = """
 {
-    "image_url": "http://matoryo.info/blog/wp-content/uploads/2016/10/2016-10-11-165439.jpg",
+    "image_url": "https://scontent-nrt1-1.xx.fbcdn.net/v/t1.0-1/p160x160/10487422_859730147372143_7945100787930646381_n.jpg?oh=4b1550c4ba26914cf6739557443a9d92&oe=59C57D46",
     "analysis_type": "seasoning"
 }"""
 

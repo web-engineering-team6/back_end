@@ -1,7 +1,13 @@
+#coding:utf-8
+
 import numpy as np
 from conv_net import ConvNet
 from optimization import *
 import sys, os
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
+from sklearn.utils import shuffle
 
 class DCGAN_trainer:
 	def __init__(self, gen, dis):
@@ -32,6 +38,7 @@ class DCGAN_trainer:
 		losslist_gen = []
 		losslist_dis = []
 		
+		start = time.time()
 		for epoch in range(epoch_num):
 			input_img_epoch = shuffle(input_img).reshape(int(len(input_img)/batch_size), batch_size, *input_img.shape[1:])
 
