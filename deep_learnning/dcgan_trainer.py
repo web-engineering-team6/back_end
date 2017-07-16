@@ -59,7 +59,7 @@ class DCGAN_trainer:
 
 		for epoch in range(epoch_num):
 			input_img_epoch = shuffle(input_img).reshape(int(len(input_img)/batch_size), batch_size, *input_img.shape[1:])
-
+			print("start %s epoch_%i" % (save ,epoch+1))
 			#inputをランダムに反転、音楽の場合どうかな？
 
 			for (i, x_in) in enumerate(input_img_epoch):

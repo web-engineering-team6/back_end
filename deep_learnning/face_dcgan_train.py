@@ -10,7 +10,7 @@ from faces.load_face import load_image
 from under_treatment import *
 
 class Generator(ConvNet):
-    def __init__(self, nz):
+    '''def __init__(self, nz):
         super(Generator, self).__init__()
         ConvNet.add_affine(self, nz, 512)
         ConvNet.add_batch_normalization(self, 512, "Relu")
@@ -21,8 +21,21 @@ class Generator(ConvNet):
         ConvNet.add_deconv(self, 32, 16, 4, 4, stride=2, pad=1, wscale=0.3)
         ConvNet.add_batch_normalization(self, 16*48*48, "Relu")
         ConvNet.add_deconv(self, 16, 3, 4, 4, stride=2, pad=1, wscale=0.3)
-        ConvNet.add_tanh(self)
+        ConvNet.add_tanh(self)'''
         #最後の層をどうするか、disの学習をどのように抑えるか
+        
+    def __init__(self, nz):
+        super(Generator, self).__init__()
+        ConvNet.add_affine(self, nz, 512*6*6, output_shape=(512, 6, 6))
+        ConvNet.add_batch_normalization(self, 512*6*6, "Relu")
+        ConvNet.add_deconv(self, 512, 256, 4, 4, stride=2 ,pad=1, wscale=0.02)
+        ConvNet.add_batch_normalization(self, 256*12*12, "Relu")
+        ConvNet.add_deconv(self, 256, 128, 4, 4, stride=2 ,pad=1, wscale=0.02)
+        ConvNet.add_batch_normalization(self, 128*24*24, "Relu")
+        ConvNet.add_deconv(self, 128, 64, 4, 4, stride=2, pad=1, wscale=0.02)
+        ConvNet.add_batch_normalization(self, 64*48*48, "Relu")
+        ConvNet.add_deconv(self, 64, 3, 4, 4, stride=2, pad=1, wscale=0.02)
+        ConvNet.add_tanh(self)
 
     def gradient_gen(self, dout):
         layers = list(self.layers.values())
@@ -41,7 +54,7 @@ class Generator(ConvNet):
 
 
 class Discriminator(ConvNet):
-    def __init__(self):
+    '''def __init__(self):
         super(Discriminator,self).__init__()
         ConvNet.add_conv(self, 3, 16, 4, 4, stride=2, pad=1)
         ConvNet.add_batch_normalization(self, 16*48*48, "Elu")
@@ -52,6 +65,19 @@ class Discriminator(ConvNet):
         ConvNet.add_affine(self, 64*12*12, 512)
         ConvNet.add_batch_normalization(self, 512, "Elu")
         ConvNet.add_affine(self, 512, 2)
+        ConvNet.add_softmax(self)'''
+    
+    def __init__(self):
+        super(Discriminator,self).__init__()
+        ConvNet.add_conv(self, 3, 64, 4, 4, stride=2, pad=1, wscale=0.02)
+        ConvNet.add_batch_normalization(self, 64*48*48, "Elu")
+        ConvNet.add_conv(self, 64, 128, 4, 4, stride=2, pad=1, wscale=0.02)
+        ConvNet.add_batch_normalization(self, 128*24*24, "Elu")
+        ConvNet.add_conv(self, 128, 256, 4, 4, stride=2, pad=1, wscale=0.02)
+        ConvNet.add_batch_normalization(self, 256*12*12, "Elu")
+        ConvNet.add_conv(self, 256, 512, 4, 4, stride=2, pad=1, wscale=0.02)
+        ConvNet.add_batch_normalization(self, 512*6*6, "Elu")
+        ConvNet.add_affine(self, 512*6*6, 2)
         ConvNet.add_softmax(self)
 
 
@@ -119,17 +145,20 @@ while True:
 gen = Generator(nz)
 dis = Discriminator()
 
+#gen.save_network("dcgan_faces/Generator_init")
+#dis.save_network("dcgan_faces/Discriminator_init")
+
 learning_rate_gen = 2e-4
 learning_rate_dis = 1e-5
-opt_gen = Adam(lr=learning_rate_gen)
-opt_dis = Adam(lr=learning_rate_dis)
+opt_gen = Adam(lr=0.0002, beta1=0.5)
+opt_dis = Adam(lr=0.0001, beta1=0.5)
 
 input_img = load_faces()
-input_img = boost_input(input_img)
+input_img = boost_input(input_img) / 255.0
 
 #学習
 dc_trainer = DCGAN_trainer(gen, dis)
-train_time = dc_trainer.train(opt_gen, opt_dis, input_img, epoch_num, nz=nz, batch_size=batch_size, save="dcgan_faces", img_test="img_test", graph="graph")
+train_time = dc_trainer.train(opt_gen, opt_dis, input_img, epoch_num, nz=nz, batch_size=batch_size, save=save, img_test="img_test", graph="graph")
 
 
 minute = train_time // 60

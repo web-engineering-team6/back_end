@@ -101,11 +101,11 @@ class ConvNet:
 
     def add_sigmoid(self):
         self.layers["Sigmoid" + str(self.layer_num)] = Sigmoid()
-        self.layer_list.append("Sigmoid_" + str(self.layer_num))
+        self.layer_list.append("Sigmoid_" + str(self.batch_norm_num))
         
     def add_tanh(self):
         self.layers["Tanh" + str(self.layer_num)] = Tanh()
-        self.layer_list.append("Tanh_" + str(self.layer_num))
+        self.layer_list.append("Tanh_" + str(self.batch_norm_num))
         
     def save_network(self, dir_name):
         try:
@@ -161,7 +161,7 @@ class ConvNet:
                 np.save("%s/%s_beta.npy" % (dir_name, layer), beta)
             
             if layer_split[0] == "Elu":
-                layers_txt += "\talpha=%f" % self.layers["layer" + layer_split[1]].alpha
+                layers_txt += "\talpha=%f" % self.layers["Elu" + layer_split[1]].alpha
             
             layers_txt += "\n"
         
