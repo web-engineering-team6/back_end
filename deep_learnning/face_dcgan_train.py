@@ -5,7 +5,7 @@ import numpy as np
 from conv_net import ConvNet
 from optimization import *
 from sys import argv
-from dcgan_trainer import DCGAN_trainer
+from dcgan_trainer_original import DCGAN_trainer
 from faces.load_face import load_image
 from under_treatment import *
 
@@ -118,7 +118,7 @@ def load_faces():
         
 
 def boost_input(x):
-    x = np.vstack((x, rolling(x)))
+    #x = np.vstack((x, rolling(x)))
     x = np.vstack((x, flipping(x)))
     x = np.vstack((x, cropping(x, move_rate=8)))
     return x
@@ -151,7 +151,7 @@ dis = Discriminator()
 learning_rate_gen = 2e-4
 learning_rate_dis = 1e-5
 opt_gen = Adam(lr=0.0002, beta1=0.5)
-opt_dis = Adam(lr=0.0001, beta1=0.5)
+opt_dis = Adam(lr=0.0002, beta1=0.5)
 
 input_img = load_faces()
 input_img = boost_input(input_img) / 255.0

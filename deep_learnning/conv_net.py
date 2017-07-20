@@ -100,11 +100,11 @@ class ConvNet:
         self.layer_list.append("Softmax")
 
     def add_sigmoid(self):
-        self.layers["Sigmoid" + str(self.layer_num)] = Sigmoid()
+        self.layers["Sigmoid" + str(self.batch_norm_num)] = Sigmoid()
         self.layer_list.append("Sigmoid_" + str(self.batch_norm_num))
         
     def add_tanh(self):
-        self.layers["Tanh" + str(self.layer_num)] = Tanh()
+        self.layers["Tanh" + str(self.batch_norm_num)] = Tanh()
         self.layer_list.append("Tanh_" + str(self.batch_norm_num))
         
     def save_network(self, dir_name):
@@ -241,6 +241,10 @@ def load_network(dir_name):
         if layer_split[0].split("_")[0] == "Sigmoid":
             layer_num = layer_split[0].split("_")[1]
             network.layers["Sigmoid" + layer_num] = Sigmoid()
+            
+        if layer_split[0].split("_")[0] == "Tanh":
+            layer_num = layer_split[0].split("_")[1]
+            network.layers["Tanh" + layer_num] = Tanh()
             
         if layer_split[0] == "Softmax":
             network.lastLayer = SoftmaxWithLoss()

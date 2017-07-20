@@ -151,7 +151,7 @@ class Tanh:
         out = np.tanh(x)
         self.out = out
 
-        return out / 2 + 1
+        return out / 2 + 0.5
 
     def backward(self, dout):
         dx = dout * (1 - np.power(self.out,2)) / 2

@@ -91,7 +91,7 @@ class DCGAN_trainer:
 				if i % 100 == 99:
 					print((time.time() - start) // 60)
 					if img_test is not None:  # 1epochごとに絵を出力,100枚ぐらい
-						x = self.gen.predict(z_test).transpose(0, 2, 3, 1)
+						x = self.gen.predict(z_test).transpose(0, 2, 3, 1)[:, :, :, ::-1]
 						fig = plt.figure(figsize=(10, 10))
 						for (j, img) in enumerate(x):
 							ax = fig.add_subplot(10, 10, j + 1, xticks=[], yticks=[])
