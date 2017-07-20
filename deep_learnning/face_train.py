@@ -15,6 +15,8 @@ start = time.time()
 from faces.load_face import load_image
 from under_treatment import *
 
+#1.networkの構造を宣言
+#conv(3ch -> 64ch) >> BN >> Relu >> pooling >> conv(64ch -> 32ch) >> ... >> softmax
 class SimpleConv(ConvNet):
     def __init__(self):
         super(SimpleConv, self).__init__()
@@ -69,6 +71,7 @@ def boost_input(x, t):
     return x, t
 
 
+#2.学習データの準備
 x_train, t_train = load_face()
 x_train, t_train = boost_input(x_train, t_train)
 
@@ -79,13 +82,21 @@ t_batch = t_train[batch_mask]
 np.save('faces/x_train_batch.npy', x_batch)
 np.save('faces/t_train_batch.npy', t_batch)
 
+#3.networkの生成
 network = SimpleConv()
 
+#4.最適化手法の宣言
 optimizer = Adam()
 
+#5.input_dataの定義
+#本当はここでtrain_dataとtest_dataを分ける。
+#今回は分けていません。
 input_data = {"x_train": x_train, "t_train": t_train, "x_test": x_train, "t_test": t_train}
 
+#6.trainerの生成
 trainer = Trainer(network)
+
+#7.学習
 train_loss_list, test_acc_list = trainer.train(optimizer, input_data, 20, batch_size = 100, save="network_online_one")
 
 elapsed_time = time.time() - start
